@@ -1,0 +1,14 @@
+{
+  "loopback-component-explorer": {
+    "mountPath": "/__explorer",
+    "generateOperationScopedModels": true
+  },
+  "loopback3-xtotalcount": {
+    "pattern": [
+      "*.find"
+    ],
+    "relationMethodNames": [
+      "prototype.__get__chapters"
+    ]
+  }
+}
