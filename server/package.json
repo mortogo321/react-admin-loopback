@@ -20,7 +20,8 @@
     "loopback-connector-mongodb": "5.0.0",
     "loopback3-xtotalcount": "^0.1.2",
     "serve-favicon": "^2.0.1",
-    "strong-error-handler": "^3.0.0"
+    "strong-error-handler": "^3.0.0",
+    "swagger-ui": "^3.18.0"
   },
   "devDependencies": {
     "eslint": "6.0.1",
