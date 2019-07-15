@@ -26,7 +26,8 @@
   "devDependencies": {
     "eslint": "6.0.1",
     "eslint-config-loopback": "13.1.0",
-    "nsp": "^3.2.1"
+    "nsp": "^3.2.1",
+    "underscore.string": "^3.3.5"
   },
   "repository": {
     "type": "",
