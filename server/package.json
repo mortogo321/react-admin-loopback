@@ -13,18 +13,18 @@
   "dependencies": {
     "compression": "^1.0.3",
     "cors": "^2.5.2",
-    "helmet": "^3.10.0",
+    "helmet": "3.21.1",
     "loopback": "^3.19.0",
     "loopback-boot": "3.3.1",
     "loopback-component-explorer": "^6.0.0",
-    "loopback-connector-mongodb": "5.0.0",
+    "loopback-connector-mongodb": "5.0.1",
     "loopback3-xtotalcount": "^0.1.2",
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^3.0.0",
-    "swagger-ui": "^3.18.0"
+    "swagger-ui": "3.23.11"
   },
   "devDependencies": {
-    "eslint": "6.0.1",
+    "eslint": "6.4.0",
     "eslint-config-loopback": "13.1.0",
     "nsp": "^3.2.1",
     "underscore.string": "^3.3.5"
