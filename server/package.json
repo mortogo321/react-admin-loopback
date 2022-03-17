@@ -21,7 +21,7 @@
     "loopback3-xtotalcount": "^0.1.2",
     "serve-favicon": "^2.0.1",
     "strong-error-handler": "^3.0.0",
-    "swagger-ui": "3.23.11"
+    "swagger-ui": "4.1.3"
   },
   "devDependencies": {
     "eslint": "6.4.0",
