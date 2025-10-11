@@ -1,0 +1,10 @@
+node_modules
+npm-debug.log
+pnpm-debug.log
+.git
+.gitignore
+.env
+.env.local
+dist
+*.log
+.DS_Store
