@@ -22,7 +22,7 @@ A full-stack admin panel demo built with React Admin, an Express REST API, and M
 
 ```bash
 docker compose -f docker/compose.development.yml up --build
-docker exec react-admin-server-dev bun run seed   # seed sample data
+docker exec react-admin-server-dev pnpm run seed   # seed sample data
 ```
 
 - Frontend: http://localhost:3000
