@@ -8,7 +8,7 @@ export const Dashboard = () => (
     <CardContent>
       <h2>Modern Stack</h2>
       <ul>
-        <li><strong>Frontend:</strong> React 19 + React Admin 5.x + Material UI 6 + Vite</li>
+        <li><strong>Frontend:</strong> React 19 + React Admin 5.x + Material UI 9 + Vite</li>
         <li><strong>Backend:</strong> Express + MongoDB + JWT Authentication</li>
         <li><strong>Features:</strong> Full CRUD operations, filtering, sorting, pagination</li>
       </ul>

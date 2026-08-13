@@ -9,7 +9,7 @@
     "dev": "nodemon src/index.js",
     "seed": "node src/seed.js"
   },
-  "packageManager": "pnpm@9.15.0",
+  "packageManager": "bun@1.3.14",
   "keywords": ["express", "mongodb", "rest-api", "jwt"],
   "author": "",
   "license": "MIT",
