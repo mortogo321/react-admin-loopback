@@ -1,18 +1,19 @@
 # Multi-stage production Dockerfile for Server
 
 # Stage 1: Build stage
+FROM oven/bun:1.3-alpine AS bun
 FROM node:20-alpine AS builder
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# Bring in the bun binary (oven/bun images don't ship node, but src/index.js needs it)
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json bun.lock ./
 
 # Install dependencies
-RUN pnpm install --prod --frozen-lockfile
+RUN bun install --frozen-lockfile --production
 
 # Stage 2: Production stage
 FROM node:20-alpine AS production
@@ -25,7 +26,7 @@ RUN addgroup -g 1001 -S nodejs && \
 
 # Copy package files and dependencies from builder
 COPY --from=builder /app/node_modules ./node_modules
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json bun.lock ./
 
 # Copy application source
 COPY src ./src

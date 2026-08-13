@@ -1,24 +1,26 @@
 # Multi-stage production Dockerfile for Web
 
 # Stage 1: Build stage
+FROM oven/bun:1.3-alpine AS bun
 FROM node:20-alpine AS builder
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# Bring in the bun binary (oven/bun images don't ship node, but vite's bin
+# has a `#!/usr/bin/env node` shebang)
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 
 # Copy package files
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json bun.lock ./
 
 # Install all dependencies (including devDependencies for build)
-RUN pnpm install --frozen-lockfile
+RUN bun install --frozen-lockfile
 
 # Copy application source
 COPY . .
 
 # Build the application
-RUN pnpm run build
+RUN bun run build
 
 # Stage 2: Production stage with nginx
 FROM nginx:1.27-alpine AS production

@@ -1,6 +1,6 @@
 node_modules
 npm-debug.log
-pnpm-debug.log
+bun-debug.log
 .git
 .gitignore
 .env

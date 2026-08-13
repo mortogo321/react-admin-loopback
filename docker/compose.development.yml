@@ -40,7 +40,7 @@ services:
         condition: service_healthy
     networks:
       - react-admin-network-dev
-    command: pnpm run dev
+    command: bun run dev
 
   web:
     build:
@@ -59,7 +59,7 @@ services:
       - server
     networks:
       - react-admin-network-dev
-    command: pnpm run dev -- --host
+    command: bun run dev -- --host
 
 networks:
   react-admin-network-dev:

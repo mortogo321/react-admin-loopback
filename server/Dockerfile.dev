@@ -1,17 +1,18 @@
 FROM node:20-alpine
 
-# Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+# Bring in the bun binary (oven/bun images don't ship node, and `dev` runs
+# nodemon, whose bin has a `#!/usr/bin/env node` shebang)
+COPY --from=oven/bun:1.3-alpine /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 
 # Install dependencies
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install
+COPY package.json bun.lock ./
+RUN bun install
 
 # Copy source code
 COPY . .
 
 EXPOSE 8000
 
-CMD ["pnpm", "run", "dev"]
+CMD ["bun", "run", "dev"]
