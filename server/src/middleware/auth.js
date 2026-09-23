@@ -1,9 +1,19 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
+export const getTokenFromHeader = (authorization) => {
+  if (!authorization || typeof authorization !== 'string') return null;
+  const [scheme, token] = authorization.split(' ');
+  if (!/^Bearer$/i.test(scheme) || !token) return null;
+  return token;
+};
+
 export const authenticate = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({ message: 'Server misconfigured: JWT_SECRET is not set' });
+    }
+    const token = getTokenFromHeader(req.headers.authorization);
 
     if (!token) {
       return res.status(401).json({ message: 'Authentication required' });
@@ -18,13 +28,13 @@ export const authenticate = async (req, res, next) => {
 
     req.user = user;
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
 
 export const isAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin') {
+  if (!req.user || req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Admin access required' });
   }
   next();

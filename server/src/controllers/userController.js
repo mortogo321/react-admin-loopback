@@ -1,8 +1,11 @@
 import User from '../models/User.js';
+import { parseIdsQuery, parseListQuery, setTotalCount } from '../utils/query.js';
+
+const ALLOWED_SORT = ['username', 'email', 'role', 'createdAt', 'updatedAt'];
 
 export const getUsers = async (req, res) => {
   try {
-    const { _start, _end, _sort, _order, q } = req.query;
+    const { q } = req.query;
 
     let query = {};
     if (q) {
@@ -14,19 +17,18 @@ export const getUsers = async (req, res) => {
       };
     }
 
-    const start = parseInt(_start) || 0;
-    const end = parseInt(_end) || 10;
-    const sortField = _sort || 'createdAt';
-    const sortOrder = _order === 'ASC' ? 1 : -1;
+    const { start, limit, sortField, sortOrder } = parseListQuery(req.query, {
+      allowedSort: ALLOWED_SORT,
+      defaultSort: 'createdAt',
+    });
 
     const total = await User.countDocuments(query);
     const users = await User.find(query)
       .sort({ [sortField]: sortOrder })
       .skip(start)
-      .limit(end - start);
+      .limit(limit);
 
-    res.set('X-Total-Count', total);
-    res.set('Access-Control-Expose-Headers', 'X-Total-Count');
+    setTotalCount(res, total);
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -84,11 +86,11 @@ export const deleteUser = async (req, res) => {
 
 export const deleteUsers = async (req, res) => {
   try {
-    const { ids } = req.query;
-    const idsArray = JSON.parse(ids);
+    const idsArray = parseIdsQuery(req.query.ids);
     await User.deleteMany({ _id: { $in: idsArray } });
     res.json({ message: 'Users deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const status = error.message.startsWith('Missing') || error.message.startsWith('Invalid') || error.message.startsWith('Too many') ? 400 : 500;
+    res.status(status).json({ message: error.message });
   }
 };

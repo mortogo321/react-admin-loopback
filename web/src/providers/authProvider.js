@@ -1,4 +1,12 @@
-const API_URL = 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api';
+
+const readUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('user'));
+  } catch {
+    return null;
+  }
+};
 
 export const authProvider = {
   login: async ({ username, password }) => {
@@ -8,9 +16,15 @@ export const authProvider = {
       headers: new Headers({ 'Content-Type': 'application/json' }),
     });
 
-    const response = await fetch(request);
+    let response;
+    try {
+      response = await fetch(request);
+    } catch {
+      throw new Error('Cannot reach the API. Is the backend running?');
+    }
     if (response.status < 200 || response.status >= 300) {
-      throw new Error(response.statusText);
+      const body = await response.json().catch(() => null);
+      throw new Error(body?.message || response.statusText || 'Login failed');
     }
 
     const { token, user } = await response.json();
@@ -40,20 +54,17 @@ export const authProvider = {
   },
 
   getIdentity: () => {
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      return Promise.resolve({
-        id: user.id,
-        fullName: user.username,
-        avatar: user.avatar,
-      });
-    } catch (error) {
-      return Promise.reject(error);
-    }
+    const user = readUser();
+    if (!user) return Promise.reject(new Error('No identity'));
+    return Promise.resolve({
+      id: user.id,
+      fullName: user.username,
+      avatar: user.avatar,
+    });
   },
 
   getPermissions: () => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = readUser();
     return Promise.resolve(user?.role || 'user');
   },
 };

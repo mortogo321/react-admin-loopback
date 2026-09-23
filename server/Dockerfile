@@ -1,8 +1,8 @@
 # Multi-stage production Dockerfile for Server
 
 # Stage 1: Build stage
-FROM oven/bun:1.3-alpine AS bun
-FROM node:20-alpine AS builder
+FROM oven/bun:1-alpine AS bun
+FROM node:22-alpine AS builder
 
 # Bring in the bun binary (oven/bun images don't ship node, but src/index.js needs it)
 COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
@@ -16,7 +16,7 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
 
 # Stage 2: Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 WORKDIR /app
 
@@ -43,7 +43,7 @@ EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:8000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "fetch('http://localhost:8000/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 # Start the application
 CMD ["node", "src/index.js"]

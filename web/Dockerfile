@@ -1,8 +1,8 @@
 # Multi-stage production Dockerfile for Web
 
 # Stage 1: Build stage
-FROM oven/bun:1.3-alpine AS bun
-FROM node:20-alpine AS builder
+FROM oven/bun:1-alpine AS bun
+FROM node:22-alpine AS builder
 
 # Bring in the bun binary (oven/bun images don't ship node, but vite's bin
 # has a `#!/usr/bin/env node` shebang)
@@ -23,7 +23,7 @@ COPY . .
 RUN bun run build
 
 # Stage 2: Production stage with nginx
-FROM nginx:1.27-alpine AS production
+FROM nginx:1.29-alpine AS production
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf

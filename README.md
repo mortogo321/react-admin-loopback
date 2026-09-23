@@ -1,5 +1,9 @@
 # React Admin Full-Stack Demo
 
+![CI](https://github.com/mortogo321/react-admin-loopback/actions/workflows/ci.yml/badge.svg)
+![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+
 A full-stack admin panel demo built with React Admin, an Express REST API, and MongoDB, covering CRUD, JWT auth with role-based access, and Docker deployment.
 
 ## What's inside
@@ -37,6 +41,27 @@ cd web && bun install && bun run dev
 ```
 
 Requires a local MongoDB instance reachable at `mongodb://localhost:27017` (see `server/.env.example`).
+
+Copy env templates before running locally:
+
+```bash
+cp server/.env.example server/.env
+cp web/.env.example web/.env
+```
+
+Frontend reads `VITE_API_URL` (defaults to `http://localhost:8000/api`).
+Backend reads `CORS_ORIGIN` (comma-separated, defaults to `http://localhost:3000`) and enforces `JWT_SECRET` + `MONGODB_URI`.
+
+## Checks
+
+```bash
+cd server && bun install && bun run lint && bun run test
+cd ../web && bun install && bun run lint && bun run build
+docker compose -f docker/compose.development.yml config
+docker compose -f docker/compose.production.yml config
+```
+
+CI (`.github/workflows/ci.yml`) runs server lint + tests, web lint + build, and `docker compose config` validation on every push/PR. Dependabot checks npm + Docker weekly.
 
 ## Structure
 

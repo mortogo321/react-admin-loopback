@@ -1,8 +1,11 @@
 import Expense from '../models/Expense.js';
+import { parseIdsQuery, parseListQuery, setTotalCount } from '../utils/query.js';
+
+const ALLOWED_SORT = ['title', 'amount', 'category', 'date', 'createdAt', 'updatedAt'];
 
 export const getExpenses = async (req, res) => {
   try {
-    const { _start, _end, _sort, _order, q, category, userId } = req.query;
+    const { q, category, userId } = req.query;
 
     let query = {};
     if (q) {
@@ -15,20 +18,19 @@ export const getExpenses = async (req, res) => {
       query.userId = userId;
     }
 
-    const start = parseInt(_start) || 0;
-    const end = parseInt(_end) || 10;
-    const sortField = _sort || 'date';
-    const sortOrder = _order === 'ASC' ? 1 : -1;
+    const { start, limit, sortField, sortOrder } = parseListQuery(req.query, {
+      allowedSort: ALLOWED_SORT,
+      defaultSort: 'date',
+    });
 
     const total = await Expense.countDocuments(query);
     const expenses = await Expense.find(query)
       .populate('userId', 'username email')
       .sort({ [sortField]: sortOrder })
       .skip(start)
-      .limit(end - start);
+      .limit(limit);
 
-    res.set('X-Total-Count', total);
-    res.set('Access-Control-Expose-Headers', 'X-Total-Count');
+    setTotalCount(res, total);
     res.json(expenses);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -91,11 +93,11 @@ export const deleteExpense = async (req, res) => {
 
 export const deleteExpenses = async (req, res) => {
   try {
-    const { ids } = req.query;
-    const idsArray = JSON.parse(ids);
+    const idsArray = parseIdsQuery(req.query.ids);
     await Expense.deleteMany({ _id: { $in: idsArray } });
     res.json({ message: 'Expenses deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const status = error.message.startsWith('Missing') || error.message.startsWith('Invalid') || error.message.startsWith('Too many') ? 400 : 500;
+    res.status(status).json({ message: error.message });
   }
 };

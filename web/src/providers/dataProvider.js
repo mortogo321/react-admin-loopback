@@ -1,6 +1,13 @@
 import { fetchUtils } from 'react-admin';
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api';
+
+const mapId = (item) => ({ ...item, id: item.id ?? item._id });
+
+const getTotal = (headers, json) => {
+  const total = parseInt(headers.get('x-total-count'), 10);
+  return Number.isNaN(total) ? json.length : total;
+};
 
 const httpClient = (url, options = {}) => {
   if (!options.headers) {
@@ -29,15 +36,15 @@ export const dataProvider = {
     const { headers, json } = await httpClient(url);
 
     return {
-      data: json.map(item => ({ ...item, id: item._id })),
-      total: parseInt(headers.get('x-total-count'), 10),
+      data: json.map(mapId),
+      total: getTotal(headers, json),
     };
   },
 
   getOne: async (resource, params) => {
     const url = `${API_URL}/${resource}/${params.id}`;
     const { json } = await httpClient(url);
-    return { data: { ...json, id: json._id } };
+    return { data: mapId(json) };
   },
 
   getMany: async (resource, params) => {
@@ -46,7 +53,7 @@ export const dataProvider = {
     };
     const url = `${API_URL}/${resource}?${new URLSearchParams(query)}`;
     const { json } = await httpClient(url);
-    return { data: json.map(item => ({ ...item, id: item._id })) };
+    return { data: json.map(mapId) };
   },
 
   getManyReference: async (resource, params) => {
@@ -65,8 +72,8 @@ export const dataProvider = {
     const { headers, json } = await httpClient(url);
 
     return {
-      data: json.map(item => ({ ...item, id: item._id })),
-      total: parseInt(headers.get('x-total-count'), 10),
+      data: json.map(mapId),
+      total: getTotal(headers, json),
     };
   },
 
@@ -76,7 +83,7 @@ export const dataProvider = {
       method: 'POST',
       body: JSON.stringify(params.data),
     });
-    return { data: { ...json, id: json._id } };
+    return { data: mapId(json) };
   },
 
   update: async (resource, params) => {
@@ -85,7 +92,7 @@ export const dataProvider = {
       method: 'PUT',
       body: JSON.stringify(params.data),
     });
-    return { data: { ...json, id: json._id } };
+    return { data: mapId(json) };
   },
 
   updateMany: async (resource, params) => {
@@ -97,7 +104,7 @@ export const dataProvider = {
         })
       )
     );
-    return { data: responses.map(({ json }) => json._id) };
+    return { data: responses.map(({ json }) => json.id ?? json._id) };
   },
 
   delete: async (resource, params) => {
