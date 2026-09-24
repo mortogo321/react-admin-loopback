@@ -1,7 +1,19 @@
+import mongoose from 'mongoose';
 import Income from '../models/Income.js';
-import { parseIdsQuery, parseListQuery, setTotalCount } from '../utils/query.js';
+import { escapeRegExp, parseIdsQuery, parseListQuery, setTotalCount } from '../utils/query.js';
 
 const ALLOWED_SORT = ['title', 'amount', 'source', 'date', 'createdAt', 'updatedAt'];
+
+// Whitelist client-controlled fields to prevent mass assignment.
+const pickIncomeFields = (body = {}) => {
+  const out = {};
+  if (body.title !== undefined) out.title = body.title;
+  if (body.amount !== undefined) out.amount = body.amount;
+  if (body.date !== undefined) out.date = body.date;
+  if (body.source !== undefined) out.source = body.source;
+  if (body.description !== undefined) out.description = body.description;
+  return out;
+};
 
 export const getIncomes = async (req, res) => {
   try {
@@ -9,12 +21,15 @@ export const getIncomes = async (req, res) => {
 
     let query = {};
     if (q) {
-      query.title = { $regex: q, $options: 'i' };
+      query.title = { $regex: escapeRegExp(q), $options: 'i' };
     }
     if (source) {
       query.source = source;
     }
     if (userId) {
+      if (!mongoose.isValidObjectId(userId)) {
+        return res.status(400).json({ message: 'Invalid userId' });
+      }
       query.userId = userId;
     }
 
@@ -39,6 +54,9 @@ export const getIncomes = async (req, res) => {
 
 export const getIncome = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid income id' });
+    }
     const income = await Income.findById(req.params.id).populate('userId', 'username email');
     if (!income) {
       return res.status(404).json({ message: 'Income not found' });
@@ -52,7 +70,7 @@ export const getIncome = async (req, res) => {
 export const createIncome = async (req, res) => {
   try {
     const income = await Income.create({
-      ...req.body,
+      ...pickIncomeFields(req.body),
       userId: req.body.userId || req.user._id,
     });
     const populatedIncome = await income.populate('userId', 'username email');
@@ -64,9 +82,12 @@ export const createIncome = async (req, res) => {
 
 export const updateIncome = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid income id' });
+    }
     const income = await Income.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      pickIncomeFields(req.body),
       { new: true, runValidators: true }
     ).populate('userId', 'username email');
 
@@ -81,6 +102,9 @@ export const updateIncome = async (req, res) => {
 
 export const deleteIncome = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid income id' });
+    }
     const income = await Income.findByIdAndDelete(req.params.id);
     if (!income) {
       return res.status(404).json({ message: 'Income not found' });

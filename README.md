@@ -50,7 +50,7 @@ cp web/.env.example web/.env
 ```
 
 Frontend reads `VITE_API_URL` (defaults to `http://localhost:8000/api`).
-Backend reads `CORS_ORIGIN` (comma-separated, defaults to `http://localhost:3000`) and enforces `JWT_SECRET` + `MONGODB_URI`.
+Backend reads `CORS_ORIGIN` (comma-separated, defaults to `http://localhost:3000`) and enforces `JWT_SECRET` + `MONGODB_URI`. Token lifetime is configurable via `JWT_EXPIRES_IN` (defaults to `7d`).
 
 ## Checks
 

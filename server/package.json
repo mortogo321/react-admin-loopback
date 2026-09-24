@@ -17,21 +17,21 @@
   "license": "MIT",
   "dependencies": {
     "express": "^5.2.1",
-    "mongoose": "^9.9.2",
+    "mongoose": "^9.10.2",
     "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
+    "dotenv": "^18.0.3",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
     "helmet": "^8.3.0",
     "express-validator": "^7.3.2",
-    "morgan": "^1.11.0",
-    "compression": "^1.8.1",
+    "morgan": "^1.12.1",
+    "compression": "^1.8.2",
     "express-rate-limit": "^8.2.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
-    "eslint": "^9.39.1",
+    "eslint": "^10.11.0",
     "nodemon": "^3.1.14"
   },
   "engines": {

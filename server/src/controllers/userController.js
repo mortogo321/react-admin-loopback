@@ -1,7 +1,20 @@
+import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
-import { parseIdsQuery, parseListQuery, setTotalCount } from '../utils/query.js';
+import { escapeRegExp, parseIdsQuery, parseListQuery, setTotalCount } from '../utils/query.js';
 
 const ALLOWED_SORT = ['username', 'email', 'role', 'createdAt', 'updatedAt'];
+
+// Whitelist client-controlled fields to prevent mass assignment (e.g. _id, __v).
+const pickUserFields = (body = {}) => {
+  const out = {};
+  if (body.username !== undefined) out.username = body.username;
+  if (body.email !== undefined) out.email = body.email;
+  if (body.password !== undefined) out.password = body.password;
+  if (body.role !== undefined) out.role = body.role;
+  if (body.avatar !== undefined) out.avatar = body.avatar;
+  return out;
+};
 
 export const getUsers = async (req, res) => {
   try {
@@ -9,10 +22,11 @@ export const getUsers = async (req, res) => {
 
     let query = {};
     if (q) {
+      const safe = escapeRegExp(q);
       query = {
         $or: [
-          { username: { $regex: q, $options: 'i' } },
-          { email: { $regex: q, $options: 'i' } }
+          { username: { $regex: safe, $options: 'i' } },
+          { email: { $regex: safe, $options: 'i' } }
         ]
       };
     }
@@ -37,6 +51,9 @@ export const getUsers = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid user id' });
+    }
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -49,7 +66,7 @@ export const getUser = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const user = await User.create(req.body);
+    const user = await User.create(pickUserFields(req.body));
     res.status(201).json(user);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -58,9 +75,17 @@ export const createUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid user id' });
+    }
+    const update = pickUserFields(req.body);
+    // findByIdAndUpdate skips the pre('save') password-hashing hook, so hash here.
+    if (update.password !== undefined) {
+      update.password = await bcrypt.hash(update.password, 10);
+    }
     const user = await User.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      update,
       { new: true, runValidators: true }
     );
     if (!user) {
@@ -74,6 +99,9 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid user id' });
+    }
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

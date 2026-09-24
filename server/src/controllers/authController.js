@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-// Generate JWT token
+// Generate JWT token (lifetime configurable via JWT_EXPIRES_IN, defaults to 7d)
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 };
 
 export const login = async (req, res) => {

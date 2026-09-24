@@ -8,6 +8,7 @@ import {
   deleteUsers,
 } from '../controllers/userController.js';
 import { authenticate, isAdmin } from '../middleware/auth.js';
+import { objectIdParam, userCreateRules, userUpdateRules, validate } from '../middleware/validate.js';
 
 const router = express.Router();
 
@@ -88,7 +89,7 @@ router.get('/', authenticate, getUsers);
  *       404:
  *         description: User not found
  */
-router.get('/:id', authenticate, getUser);
+router.get('/:id', authenticate, objectIdParam(), validate, getUser);
 
 /**
  * @swagger
@@ -114,7 +115,7 @@ router.get('/:id', authenticate, getUser);
  *       403:
  *         description: Admin access required
  */
-router.post('/', authenticate, isAdmin, createUser);
+router.post('/', authenticate, isAdmin, userCreateRules, validate, createUser);
 
 /**
  * @swagger
@@ -147,7 +148,7 @@ router.post('/', authenticate, isAdmin, createUser);
  *       404:
  *         description: User not found
  */
-router.put('/:id', authenticate, isAdmin, updateUser);
+router.put('/:id', authenticate, isAdmin, objectIdParam(), validate, userUpdateRules, validate, updateUser);
 
 /**
  * @swagger
@@ -170,7 +171,7 @@ router.put('/:id', authenticate, isAdmin, updateUser);
  *       404:
  *         description: User not found
  */
-router.delete('/:id', authenticate, isAdmin, deleteUser);
+router.delete('/:id', authenticate, isAdmin, objectIdParam(), validate, deleteUser);
 
 /**
  * @swagger

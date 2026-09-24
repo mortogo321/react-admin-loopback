@@ -44,3 +44,6 @@ export const setTotalCount = (res, total) => {
   res.set('X-Total-Count', String(total));
   res.set('Access-Control-Expose-Headers', 'X-Total-Count');
 };
+
+// Escape user input before embedding it in a $regex query (ReDoS safety).
+export const escapeRegExp = (value) => String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
